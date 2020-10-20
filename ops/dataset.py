@@ -88,7 +88,7 @@ class TSNDataSet(data.Dataset):
                 flow_x, flow_y, _ = flow.split()
                 x_img = flow_x.convert('L')
                 y_img = flow_y.convert('L')
-
+            
             return [x_img, y_img]
 
     def _parse_list(self):

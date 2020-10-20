@@ -10,7 +10,7 @@ import subprocess
 from multiprocessing import Pool
 from tqdm import tqdm
 
-n_thread = 100
+n_thread = 10
 
 
 def vid2jpg(file_name, class_path, dst_class_path):
@@ -35,7 +35,7 @@ def vid2jpg(file_name, class_path, dst_class_path):
         print(dst_directory_path)
         return
     cmd = 'ffmpeg -i \"{}\" -threads 1 -vf scale=-1:331 -q:v 0 \"{}/img_%05d.jpg\"'.format(video_file_path, dst_directory_path)
-    # print(cmd)
+    print(cmd)
     subprocess.call(cmd, shell=True,
                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
@@ -66,13 +66,13 @@ def class_process(dir_path, dst_dir_path, class_name):
 
 
 if __name__ == "__main__":
-    dir_path = sys.argv[1]
-    dst_dir_path = sys.argv[2]
+    dir_path = "../data/original"
+    dst_dir_path = "../data/original_frame_data"
 
     class_list = os.listdir(dir_path)
     class_list.sort()
     for class_name in class_list:
         class_process(dir_path, dst_dir_path, class_name)
 
-    class_name = 'test'
-    class_process(dir_path, dst_dir_path, class_name)
+#    class_name = 'test'
+#    class_process(dir_path, dst_dir_path, class_name)

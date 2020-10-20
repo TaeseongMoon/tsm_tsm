@@ -277,7 +277,7 @@ for i, data_label_pairs in enumerate(zip(*data_iter_list)):
         for p, g in zip(ensembled_predict, this_label.cpu().numpy()):
             output.append([p[None, ...], g])
         cnt_time = time.time() - proc_start_time
-        prec1, prec5 = accuracy(torch.from_numpy(ensembled_predict), this_label, topk=(1, 5))
+        prec1, prec5 = accuracy(torch.from_numpy(ensembled_predict), this_label, topk=(1, 3))
         top1.update(prec1.item(), this_label.numel())
         top5.update(prec5.item(), this_label.numel())
         if i % 20 == 0:

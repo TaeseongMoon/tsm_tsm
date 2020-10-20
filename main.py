@@ -5,6 +5,7 @@
 
 import os
 import time
+import argparse
 import shutil
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
@@ -23,11 +24,11 @@ from tensorboardX import SummaryWriter
 
 best_prec1 = 0
 
-
 def main():
     global args, best_prec1
-    args = parser.parse_args()
 
+    args = parser.parse_args()
+    
     num_class, args.train_list, args.val_list, args.root_path, prefix = dataset_config.return_dataset(args.dataset,
                                                                                                       args.modality)
     full_arch_name = args.arch
@@ -79,6 +80,7 @@ def main():
                                 weight_decay=args.weight_decay)
 
     if args.resume:
+        print('here is resume')
         if args.temporal_pool:  # early temporal pool so that we can load the state_dict
             make_temporal_pool(model.module.base_model, args.num_segments)
         if os.path.isfile(args.resume):
@@ -126,7 +128,7 @@ def main():
         make_temporal_pool(model.module.base_model, args.num_segments)
 
     cudnn.benchmark = True
-
+    
     # Data loading code
     if args.modality != 'RGBDiff':
         normalize = GroupNormalize(input_mean, input_std)
@@ -137,6 +139,7 @@ def main():
         data_length = 1
     elif args.modality in ['Flow', 'RGBDiff']:
         data_length = 5
+    print('dataset info: ', num_class, args.train_list, args.val_list, args.root_path, prefix)
 
     train_loader = torch.utils.data.DataLoader(
         TSNDataSet(args.root_path, args.train_list, num_segments=args.num_segments,
@@ -150,7 +153,7 @@ def main():
                        normalize,
                    ]), dense_sample=args.dense_sample),
         batch_size=args.batch_size, shuffle=True,
-        num_workers=args.workers, pin_memory=True,
+        num_workers=0, pin_memory=True,
         drop_last=True)  # prevent something not % n_GPU
 
     val_loader = torch.utils.data.DataLoader(
@@ -167,7 +170,7 @@ def main():
                        normalize,
                    ]), dense_sample=args.dense_sample),
         batch_size=args.batch_size, shuffle=False,
-        num_workers=args.workers, pin_memory=True)
+        num_workers=0, pin_memory=True)
 
     # define loss function (criterion) and optimizer
     if args.loss_type == 'nll':
@@ -344,6 +347,7 @@ def save_checkpoint(state, is_best):
     torch.save(state, filename)
     if is_best:
         shutil.copyfile(filename, filename.replace('pth.tar', 'best.pth.tar'))
+    
 
 
 def adjust_learning_rate(optimizer, epoch, lr_type, lr_steps):
